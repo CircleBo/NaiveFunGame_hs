@@ -274,9 +274,30 @@ instance YesNo [a] where
 instance YesNo Bool where  
     yesno = id
 --Functor
-
+--class Functor f where  
+--    fmap :: (a -> b) -> f a -> f b  
+--fmap :: (a -> b) -> f a -> f b
+--fmap :: (a -> b) -> (f a -> f b)
+--lifting
+--ghci> :t fmap (*2)  
+--fmap (*2) :: (Num a, Functor f) => f a -> f a
+--You can think of fmap as either a function that takes a function and a functor 
+--and then maps that function over the functor, 
+--or you can think of it as a function that takes a function and lifts that function 
+--so that it operates on functors. 
+--Both views are correct and in Haskell, equivalent.
+--functor laws
+--The first functor law states that 
+--if we map the id function over a functor, 
+--the functor that we get back should be the same as the original functor.
+--The second law says that 
+--composing two functions and then mapping the resulting function over a functor 
+--should be the same as first mapping one function over the functor 
+--and then mapping the other one. 
+--fmap (f . g) == fmap f . fmap g.
+--fmap (f . g) F == fmap f (fmap g F).
+data CMaybe a = CNothing | CJust Int a deriving (Show)
 --Kinds and some type-foo
-
 --A kind is more or less the type of a type
 --ghci> :k Int  
 --Int :: *
@@ -289,122 +310,13 @@ instance YesNo Bool where
 class Tofu t where  
     tofu :: j a -> t a j
 data Frank a b  = Frank {frankField :: b a} deriving (Show)
+--Applicative functors
+ 
+--Monoid
+--mempty `mappend` x = x
+--x `mappend` mempty = x
+--(x `mappend` y) `mappend` z = x `mappend` (y `mappend` z)
 
 --
 --
 --
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
---
-
-
-
-
-
