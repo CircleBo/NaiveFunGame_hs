@@ -101,6 +101,12 @@ instance Monoid (First a) where
     First (Just x) `mappend` _ = First (Just x)  
     First Nothing `mappend` x = x  
 
+ class Applicative m => Monad (m :: * -> *) where
+  (>>=) :: m a -> (a -> m b) -> m b
+  (>>) :: m a -> m b -> m b
+  return :: a -> m a
+  fail :: String -> m a   
+
 class Monad m where  
     return :: a -> m a    
     (>>=) :: m a -> (a -> m b) -> m b     
