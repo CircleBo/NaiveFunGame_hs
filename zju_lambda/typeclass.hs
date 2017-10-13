@@ -8,7 +8,9 @@ infixl 4 <$>
 infixl 4 <$
 -- The default definition is fmap . const, 
 --but this may be overridden with a more efficient version.
-
+--------------------------------
+--Minimal complete definition
+--fmap
 --------------------------------
 --fmap id == id
 --fmap (f.g) == fmap f . fmap g
@@ -38,6 +40,9 @@ class (Functor f) => Applicative f where
 (<*>) :: Applicative f => f (a -> b) -> f a -> f b
 infixl 4 <*>
 liftA2 :: Applicative f => (a -> b -> c) -> f a -> f b -> f c
+--------------------------------------------
+--Minimal complete definition
+--pure, ((<*>) | liftA2)
 --A minimal complete definition must include implementations of pure and of either <*> or liftA2. 
 --If it defines both, then they must behave the same as their default definitions:
 --(<*>) == liftA2 id 
