@@ -100,6 +100,8 @@ class Monad m where
     fail :: String -> m a  
     fail msg = error msg  
 -------------------------------------------------------------------------------------------
+--Minimal complete definition
+--(>>=)
 --------------------------------------------
 class Applicative m => Monad m where
     -- | Sequentially compose two actions, passing any value produced
@@ -160,3 +162,8 @@ instance Monad Maybe where
     Nothing >>= f = Nothing  
     Just x >>= f  = f x  
     fail _ = Nothing
+---------------------------------------------
+instance Monad []  where
+    xs >>= f             = [y | x <- xs, y <- f x]
+    (>>) = (*>)
+    fail _              = []
