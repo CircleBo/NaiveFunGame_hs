@@ -172,3 +172,21 @@ instance Monad []  where
     xs >>= f             = [y | x <- xs, y <- f x]
     (>>) = (*>)
     fail _              = []
+---------------------------------------------
+instance Functor ((->) r) where
+    fmap = (.)
+
+--const :: a -> b -> a
+--const x is a unary function which evaluates to x for all inputs.
+instance Applicative ((->) a) where
+pure = const
+(<*>) f g x = f x (g x)
+liftA2 q f g x = q (f x) (g x)
+
+instance Monad ((->) r) where
+    f >>= k = \ r -> k (f r) r
+
+--do notation
+six = sum $ do 
+    x<-[1,2,3] 
+    return x
