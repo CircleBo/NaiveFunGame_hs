@@ -108,6 +108,35 @@ class Monad m where
 --Minimal complete definition
 --(>>=)
 --------------------------------------------
+{- | The 'Monad' class defines the basic operations over a /monad/,
+a concept from a branch of mathematics known as /category theory/.
+From the perspective of a Haskell programmer, however, it is best to
+think of a monad as an /abstract datatype/ of actions.
+Haskell's @do@ expressions provide a convenient syntax for writing
+monadic expressions.
+
+Instances of 'Monad' should satisfy the following laws:
+
+* @'return' a '>>=' k  =  k a@
+* @m '>>=' 'return'  =  m@
+* @m '>>=' (\\x -> k x '>>=' h)  =  (m '>>=' k) '>>=' h@
+
+Furthermore, the 'Monad' and 'Applicative' operations should relate as follows:
+
+* @'pure' = 'return'@
+* @('<*>') = 'ap'@
+
+The above laws imply:
+
+* @'fmap' f xs  =  xs '>>=' 'return' . f@
+* @('>>') = ('*>')@
+
+and that 'pure' and ('<*>') satisfy the applicative functor laws.
+
+The instances of 'Monad' for lists, 'Data.Maybe.Maybe' and 'System.IO.IO'
+defined in the "Prelude" satisfy these laws.
+-}
+--------------------------------------------
 class Applicative m => Monad m where
     -- | Sequentially compose two actions, passing any value produced
     -- by the first as an argument to the second.
@@ -190,9 +219,7 @@ instance Monad ((->) r) where
 six = sum $ do 
     x<-[1,2,3] 
     return x
-{-
 
--}
 
 -- | The class of monoids (types with an associative binary operation that
 -- has an identity).  Instances should satisfy the following laws:
@@ -227,7 +254,7 @@ class Monoid a where
 
     mconcat = foldr mappend mempty
 
--- | @since 2.01
+
 instance Monoid [a] where
     {-# INLINE mempty #-}
     mempty  = []
@@ -235,3 +262,79 @@ instance Monoid [a] where
     mappend = (++)
     {-# INLINE mconcat #-}
     mconcat xss = [x | xs <- xss, x <- xs]
+---------------------------------------------
+instance Monoid b => Monoid (a -> b) where
+    mempty _ = mempty
+    mappend f g x = f x `mappend` g x
+
+-- -----------------------------------------------------------------------------
+-- The Alternative class definition
+
+infixl 3 <|>
+(<|>) :: Alternative f => f a -> f a -> f a
+
+--------------------------------------------
+---- | A monoid on applicative functors.----
+--------------------------------------------
+
+
+--
+-- If defined, 'some' and 'many' should be the least solutions
+-- of the equations:
+--
+-- * @some v = (:) '<$>' v '<*>' many v@
+--
+-- * @many v = some v '<|>' 'pure' []@
+class Applicative f => Alternative f where
+    -- | The identity of '<|>'
+    empty :: f a
+    -- | An associative binary operation
+    (<|>) :: f a -> f a -> f a
+
+    -- | One or more.
+    some :: f a -> f [a]
+    some v = some_v
+      where
+        many_v = some_v <|> pure []
+        some_v = liftA2 (:) v many_v
+
+    -- | Zero or more.
+    many :: f a -> f [a]
+    many v = many_v
+      where
+        many_v = some_v <|> pure []
+        some_v = liftA2 (:) v many_v
+
+
+instance Alternative Maybe where
+    empty = Nothing
+    Nothing <|> r = r
+    l       <|> _ = l
+
+instance Alternative [] where
+    empty = []
+    (<|>) = (++)
+
+-- -----------------------------------------------------------------------------
+-- The MonadPlus class definition
+
+-- | Monads that also support choice and failure.
+class (Alternative m, Monad m) => MonadPlus m where
+    -- | the identity of 'mplus'.  It should also satisfy the equations
+    --
+    -- > mzero >>= f  ==  mzero
+    -- > v >> mzero   ==  mzero
+    --
+    --mzero `mplus` ma == ma `mplus` mzero == ma
+    --ma `mplus` (mb `mplus` mc) == (ma `mplus` mb) `mplus` mc
+    mzero :: m a
+    mzero = empty
+ 
+    -- | an associative operation
+    mplus :: m a -> m a -> m a
+    mplus = (<|>)
+
+instance MonadPlus []  where
+    mzero = []
+    mplus xs ys = xs ++ ys 
+ 
