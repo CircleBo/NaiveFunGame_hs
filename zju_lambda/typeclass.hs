@@ -215,11 +215,6 @@ liftA2 q f g x = q (f x) (g x)
 instance Monad ((->) r) where
     f >>= k = \ r -> k (f r) r
 
---do notation
-six = sum $ do 
-    x<-[1,2,3] 
-    return x
-
 
 -- | The class of monoids (types with an associative binary operation that
 -- has an identity).  Instances should satisfy the following laws:
@@ -277,34 +272,11 @@ infixl 3 <|>
 ---- | A monoid on applicative functors.----
 --------------------------------------------
 
-
---
--- If defined, 'some' and 'many' should be the least solutions
--- of the equations:
---
--- * @some v = (:) '<$>' v '<*>' many v@
---
--- * @many v = some v '<|>' 'pure' []@
 class Applicative f => Alternative f where
     -- | The identity of '<|>'
     empty :: f a
     -- | An associative binary operation
     (<|>) :: f a -> f a -> f a
-
-    -- | One or more.
-    some :: f a -> f [a]
-    some v = some_v
-      where
-        many_v = some_v <|> pure []
-        some_v = liftA2 (:) v many_v
-
-    -- | Zero or more.
-    many :: f a -> f [a]
-    many v = many_v
-      where
-        many_v = some_v <|> pure []
-        some_v = liftA2 (:) v many_v
-
 
 instance Alternative Maybe where
     empty = Nothing
