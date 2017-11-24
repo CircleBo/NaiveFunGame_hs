@@ -17,25 +17,30 @@ concatenation (Alt a) (Alt b)= Alt (liftA2 concatenation a b)
 
 kleene :: RE a->RE a
 kleene re = Alt (Data.List.concat (fmap (flip Data.List.replicate re) [1..]))
+-- a(b|c)*
+x = concatenation (RE "a")  (kleene (alternation [RE "b",RE "c"]))
+----------------------------------------------------------------------------------
+data State a = InitialState | AcceptedState | Concat (State a) a | Eclosure (State a) Int
+data NFA a =  NFA { nfastates::[State a],
+                    nfatransition::State a->a->State a,
+                    nfastart :: State a ,
+                    nfaaccept :: State a,
+                    nfaalphabet::Alphabet a }
 
-data State a = InitialState | AcceptedState | Concat (State a) a
-data NFA a =  DFA { states::[State a],
-                    transition::State a->a->State a,
-                    start :: State a ,
-                    accept :: State a,
-                    alphabet::Alphabet a }
+data DFA a =  DFA { dfastates::[State a],
+                    dfatransition::State a->a->State a,
+                    dfastart :: State a ,
+                    dfaaccept :: State a,
+                    dfaalphabet::Alphabet a }
 
-data DFA a =  DFA { states::[State a],
-                    transition::State a->a->State a,
-                    start :: State a ,
-                    accept :: State a,
-                    alphabet::Alphabet a }
-
-thompson :: RE a -> NFA a
-
+thompsonstates :: RE a -> [State a]
+thompsonstates (RE [])      = [InitialState,AcceptedState]
+thompsonstates (RE [a])     = [InitialState,Concat InitialState a, AcceptedState]
+thompsonstates (RE (x:xs))  = scanl Concat (Concat InitialState x) xs ++ [InitialState,AcceptedState]
+thompsonstates (Alt y) =  e ++ [InitialState,AcceptedState] ++ concat (fmap thompsonstates y)
+    where e= fmap (Eclosure InitialState) [1..length y]
+--thompsontransition :: RE a -> nfatransition
 
 
-
-
-
-
+--thompson :: RE a -> NFA a
+--thompson (RE [])=NFA{nfastart=InitialState,nfaalphabet=thisAlphabet,nfaaccept=AcceptedState,}
