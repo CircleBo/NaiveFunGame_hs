@@ -18,6 +18,7 @@ cabal.sandbox.config
 *.eventlog
 *.jpg
 *.png
+*.py
 *.ppt
 *.pptx
 .stack-work/
